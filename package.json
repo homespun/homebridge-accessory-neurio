@@ -1,0 +1,23 @@
+{ "name"                         : "homebridge-accessory-neurio"
+, "version"                      : "0.1.0"
+, "description"                  : "http://neur.io accessory plugin for Homebridge : https://github.com/nfarina/homebridge"
+, "main"                         : "index.js"
+, "scripts"                      : { "lint" : "jshint package.json *.js" }
+, "license"                      : "MIT"
+, "keywords"                     : [ "homebridge-plugin", "neur.io", "neurio", "home energy monitor" ]
+, "repository"                   :
+  { "type"                       : "git"
+  , "url"                        : "git://github.com/homespun/homebridge-accessory-neurio.git"
+  }
+, "bugs"                         : { "url": "https://github.com/homespun/homebridge-accessory-neurio/issues" }
+, "engines"                      :
+  { "node"                       : ">=0.12.0"
+  , "homebridge"                 : ">=0.3.1"
+  }
+, "dependencies"                 :
+  { "hap-nodejs-community-types" : "https://github.com/homespun/hap-nodejs-community-types.git"
+  , "node-cache"                 : "3.0.0"
+  , "underscore"                 : "1.8.3"
+  , "util"                       : ">= 0.10.3"
+  }
+}
