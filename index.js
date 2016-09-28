@@ -14,7 +14,8 @@ module.exports = function(homebridge) {
   function Neurio(log, config) {
     this.name = config.name
     this.location = require('url').parse('http://' + config.location + '/')
-    this.options = underscore.defaults(this.options || {}, { verboseP: true })
+    this.serialNo = config.serialNo || this.location.hostname
+    this.options = underscore.defaults(config.options || {}, { verboseP: false })
 
     this.log = log
     this.cache = new NodeCache({ stdTTL: config.ttl || 10 });
@@ -134,7 +135,7 @@ module.exports = function(homebridge) {
         .setCharacteristic(Characteristic.Name, this.name)
         .setCharacteristic(Characteristic.Manufacturer, "neur.io")
         .setCharacteristic(Characteristic.Model, "Home Energy Monitor")
-        .setCharacteristic(Characteristic.SerialNumber, this.location.hostname)
+        .setCharacteristic(Characteristic.SerialNumber, this.serialNo)
 
       myPowerService
         .getCharacteristic(CommunityTypes.Volts)

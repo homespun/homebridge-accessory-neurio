@@ -1,5 +1,5 @@
 { "name"                         : "homebridge-accessory-neurio"
-, "version"                      : "0.1.0"
+, "version"                      : "0.1.1"
 , "description"                  : "http://neur.io accessory plugin for Homebridge : https://github.com/nfarina/homebridge"
 , "main"                         : "index.js"
 , "scripts"                      : { "lint" : "jshint package.json *.js" }
