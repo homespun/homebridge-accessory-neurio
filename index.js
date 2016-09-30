@@ -64,22 +64,32 @@ module.exports = function(homebridge) {
   Neurio.prototype =
   { fetchChannel :
     function(callback) {
-      this.cache.get('neurio', function (err, result) {
-        var f = function(payload) {
-          return underscore.find(payload.channels || [], function (entry) { return entry.type === 'CONSUMPTION' })
+      var f = function(payload, cacheP) {
+        if ((!payload) || (!payload.channels)) {
+          this.log.error('fetchChannel cacheP=' + cacheP + ': ' + JSON.stringify(payload, null, 2))
+          return
         }
 
+        return underscore.find(payload.channels, function (entry) { return entry.type === 'CONSUMPTION' })
+      }.bind(this)
+
+      this.cache.get('neurio', function (err, result) {
         if (err) return callback(err)
 
-        if (result) return callback(null, f(result))
+        if (result) return callback(null, f(result, true))
 
         _roundTrip.bind(this)({ path: '/current-sample' }, function (err, response, result) {
-          if (!err) {
-            this.cache.set('neurio', result)
-            if (result) this.accessoryInformation.setCharacteristic(Characteristic.SerialNumber, result.sensorId)
+          if (err) {
+            this.log.error('_roundTrip error: ' + err.toString())
+            return callback(err)
           }
 
-          callback(err, f(result))
+          if (result) {
+            this.cache.set('neurio', result)
+            this.accessoryInformation.setCharacteristic(Characteristic.SerialNumber, result.sensorId)
+          }
+
+          callback(err, f(result, false))
         }.bind(this))
       }.bind(this))
     }
