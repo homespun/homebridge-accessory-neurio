@@ -1,13 +1,14 @@
 /* jshint asi: true */
 
 var NodeCache = require('node-cache')
-var inherits = require('util').inherits
-var underscore = require('underscore')
+  , inherits = require('util').inherits
+  , underscore = require('underscore')
+
 
 module.exports = function(homebridge) {
   var Characteristic = homebridge.hap.Characteristic
-  var Service = homebridge.hap.Service
-  var CommunityTypes = require('hap-nodejs-community-types')(homebridge)
+    , Service = homebridge.hap.Service
+    , CommunityTypes = require('hap-nodejs-community-types')(homebridge)
 
   homebridge.registerAccessory("homebridge-accessory-neurio", "neurio", Neurio)
 
@@ -169,7 +170,7 @@ var _roundTrip = function (params, callback) {
   var self = this
 
   var request, timeoutP
-  var client = self.location.protocol === 'https:' ? require('https') : require('http')
+    , client = self.location.protocol === 'https:' ? require('https') : require('http')
 
   params = underscore.extend(underscore.pick(self.location, [ 'protocol', 'hostname', 'port' ]), params)
   params.method = params.method || 'GET'

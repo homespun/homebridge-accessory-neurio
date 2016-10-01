@@ -22,6 +22,6 @@ Edit `~/.homebridge/config`, inside `"accessories": [ ... ]` add:
     }
 
 How can you determine the IP address (`"a.b.c.d"`),
-run [homebridge-utility-discover](https://github.com/homespun/homebridge-utility-discover),
+run [homespun-discovery](https://github.com/homespun/homespun-discovery),
 of course.
 
