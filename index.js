@@ -1,7 +1,8 @@
 /* jshint asi: true */
 
-var NodeCache = require('node-cache')
-  , inherits = require('util').inherits
+var NodeCache  = require('node-cache')
+  , inherits   = require('util').inherits
+  , roundTrip  = require('homespun-discovery').utilities.roundtrip
   , underscore = require('underscore')
 
 
@@ -79,9 +80,10 @@ module.exports = function(homebridge) {
 
         if (result) return callback(null, f(result, true))
 
-        _roundTrip.bind(this)({ path: '/current-sample' }, function (err, response, result) {
+        roundTrip(underscore.defaults({ location: this.location, logger: this.log }, this.options),
+                  { path: '/current-sample' }, function (err, response, result) {
           if (err) {
-            this.log.error('_roundTrip error: ' + err.toString())
+            this.log.error('roundTrip error: ' + err.toString())
             return callback(err)
           }
 
@@ -164,70 +166,4 @@ module.exports = function(homebridge) {
       return [ this.accessoryInformation, myPowerService ]
     }
   }
-}
-
-var _roundTrip = function (params, callback) {
-  var self = this
-
-  var request, timeoutP
-    , client = self.location.protocol === 'https:' ? require('https') : require('http')
-
-  params = underscore.extend(underscore.pick(self.location, [ 'protocol', 'hostname', 'port' ]), params)
-  params.method = params.method || 'GET'
-  params.headers = underscore.defaults(params.headers || {},
-                                       { 'content-type': 'application/json; charset=utf-8', 'accept-encoding': '' })
-
-  request = client.request(underscore.omit(params, [ 'useProxy', 'payload' ]), function (response) {
-    var body = ''
-
-    if (timeoutP) return
-    response.on('data', function (chunk) {
-      body += chunk.toString()
-    }).on('end', function () {
-      var payload
-
-      if (params.timeout) request.setTimeout(0)
-
-      if (self.options.verboseP) {
-        console.log('[ response for ' + params.method + ' ' + params.protocol + '//' + params.hostname + params.path + ' ]')
-        console.log('>>> HTTP/' + response.httpVersionMajor + '.' + response.httpVersionMinor + ' ' + response.statusCode +
-                   ' ' + (response.statusMessage || ''))
-        underscore.keys(response.headers).forEach(function (header) {
-          console.log('>>> ' + header + ': ' + response.headers[header])
-        })
-        console.log('>>>')
-        console.log('>>> ' + body.split('\n').join('\n>>> '))
-      }
-      if (Math.floor(response.statusCode / 100) !== 2) {
-        self.log.error('_roundTrip error: HTTP response ' + response.statusCode)
-        return callback(new Error('HTTP response ' + response.statusCode))
-      }
-
-      try {
-        payload = (response.statusCode !== 204) ? JSON.parse(body) : null
-      } catch (err) {
-        return callback(err)
-      }
-
-      try {
-        callback(null, response, payload)
-      } catch (err0) {
-        if (self.options.verboseP) console.log('callback: ' + err0.toString() + '\n' + err0.stack)
-      }
-    }).setEncoding('utf8')
-  }).on('error', function (err) {
-    callback(err)
-  }).on('timeout', function () {
-    timeoutP = true
-    callback(new Error('timeout'))
-  })
-  if (params.payload) request.write(JSON.stringify(params.payload))
-  request.end()
-
-  if (!self.options.verboseP) return
-
-  console.log('<<< ' + params.method + ' ' + params.protocol + '//' + params.hostname + params.path)
-  underscore.keys(params.headers).forEach(function (header) { console.log('<<< ' + header + ': ' + params.headers[header]) })
-  console.log('<<<')
-  if (params.payload) console.log('<<< ' + JSON.stringify(params.payload, null, 2).split('\n').join('\n<<< '))
 }
