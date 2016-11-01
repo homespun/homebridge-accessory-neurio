@@ -1,8 +1,6 @@
 # homebridge-accessory-neurio
 A [neur.io](http://neur.io) accessory plugin for [Homebridge](https://github.com/nfarina/homebridge).
 
-Initial commit. Nothing to see here. _Move along, move along._
-
 # Installation
 Run these commands:
 
@@ -24,4 +22,3 @@ Edit `~/.homebridge/config`, inside `"accessories": [ ... ]` add:
 How can you determine the IP address (`"a.b.c.d"`),
 run [homespun-discovery](https://github.com/homespun/homespun-discovery),
 of course.
-

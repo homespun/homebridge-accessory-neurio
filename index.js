@@ -6,7 +6,7 @@ var NodeCache  = require('node-cache')
   , underscore = require('underscore')
 
 
-module.exports = function(homebridge) {
+module.exports = function (homebridge) {
   var Characteristic = homebridge.hap.Characteristic
     , Service = homebridge.hap.Service
     , CommunityTypes = require('hap-nodejs-community-types')(homebridge)
@@ -20,10 +20,10 @@ module.exports = function(homebridge) {
     this.options = underscore.defaults(config.options || {}, { verboseP: false })
 
     this.log = log
-    this.cache = new NodeCache({ stdTTL: config.ttl || 10 });
+    this.cache = new NodeCache({ stdTTL: config.ttl || 10 })
   }
 
-  Neurio.PowerService = function(displayName, subtype) {
+  Neurio.PowerService = function (displayName, subtype) {
     Service.call(this, displayName, '00000001-0000-1000-8000-135D67EC4377', subtype)
     this.addCharacteristic(CommunityTypes.Volts)
     this.addCharacteristic(CommunityTypes.VoltAmperes)
@@ -65,8 +65,8 @@ module.exports = function(homebridge) {
 
   Neurio.prototype =
   { fetchChannel :
-    function(callback) {
-      var f = function(payload, cacheP) {
+    function (callback) {
+      var f = function (payload, cacheP) {
         if ((!payload) || (!payload.channels)) {
           this.log.error('fetchChannel cacheP=' + cacheP + ': ' + JSON.stringify(payload, null, 2))
           return
@@ -98,8 +98,8 @@ module.exports = function(homebridge) {
     }
 
   , getVolts :
-    function(callback) {
-      this.fetchChannel(function(err, channel) {
+    function (callback) {
+      this.fetchChannel(function (err, channel) {
         if (err) return callback(err)
 
         if (!channel) return callback()
@@ -109,8 +109,8 @@ module.exports = function(homebridge) {
     }
 
   , getVoltAmperes :
-    function(callback) {
-      this.fetchChannel(function(err, channel) {
+    function (callback) {
+      this.fetchChannel(function (err, channel) {
         if (err) return callback(err)
 
         if (!channel) return callback()
@@ -120,8 +120,8 @@ module.exports = function(homebridge) {
     }
 
   , getWatts :
-    function(callback) {
-      this.fetchChannel(function(err, channel) {
+    function (callback) {
+      this.fetchChannel(function (err, channel) {
         if (err) return callback(err)
 
         if (!channel) return callback()
@@ -131,8 +131,8 @@ module.exports = function(homebridge) {
     }
 
   , getKilowattHours :
-    function(callback) {
-      this.fetchChannel(function(err, channel) {
+    function (callback) {
+      this.fetchChannel(function (err, channel) {
         if (err) return callback(err)
 
         if (!channel) return callback()
@@ -141,7 +141,7 @@ module.exports = function(homebridge) {
       }.bind(this))
     }
 
-  , getServices: function() {
+  , getServices: function () {
       var myPowerService = new Neurio.PowerService("Power Functions")
 
       this.accessoryInformation = new Service.AccessoryInformation()
