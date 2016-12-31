@@ -9,7 +9,6 @@
   [ { "accessory": "neurio"
     , "name": "Home Energy Monitor"
     , "location": "192.168.1.114"
-    , "serialNo": "0x0000DEADBEEF0000"                         
     }
   ]
 , "platforms":

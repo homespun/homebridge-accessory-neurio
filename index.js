@@ -1,4 +1,4 @@
-/* jshint asi: true */
+/* jshint asi: true, node: true, laxbreak: true, laxcomma: true, undef: true, unused: true */
 
 var NodeCache  = require('node-cache')
   , inherits   = require('util').inherits
@@ -14,13 +14,17 @@ module.exports = function (homebridge) {
   homebridge.registerAccessory("homebridge-accessory-neurio", "neurio", Neurio)
 
   function Neurio(log, config) {
-    this.name = config.name
-    this.location = require('url').parse('http://' + config.location + '/')
-    this.serialNo = config.serialNo || this.location.hostname
-    this.options = underscore.defaults(config.options || {}, { verboseP: false })
+    if (!(this instanceof Neurio)) return new Neurio(log, config)
 
     this.log = log
-    this.cache = new NodeCache({ stdTTL: config.ttl || 10 })
+    this.config = config || { platform: 'neurio' }
+
+    this.location = require('url').parse('http://' + this.config.location + '/')
+    this.name = this.config.name
+    this.options = underscore.defaults(this.config.options || {}, { ttl: 10, verboseP: false })
+    this.serialNo = this.config.serialNo || this.location.hostname
+
+    this.cache = new NodeCache({ stdTTL: this.options.ttl })
   }
 
   Neurio.PowerService = function (displayName, subtype) {
@@ -66,35 +70,37 @@ module.exports = function (homebridge) {
   Neurio.prototype =
   { fetchChannel :
     function (callback) {
+      var self = this
+      
       var f = function (payload, cacheP) {
         if ((!payload) || (!payload.channels)) {
-          this.log.error('fetchChannel cacheP=' + cacheP + ': ' + JSON.stringify(payload, null, 2))
+          self.log.error('fetchChannel cacheP=' + cacheP + ': ' + JSON.stringify(payload, null, 2))
           return
         }
 
         return underscore.find(payload.channels, function (entry) { return entry.type === 'CONSUMPTION' })
-      }.bind(this)
+      }
 
-      this.cache.get('neurio', function (err, result) {
+      self.cache.get('neurio', function (err, result) {
         if (err) return callback(err)
 
         if (result) return callback(null, f(result, true))
 
-        roundTrip(underscore.defaults({ location: this.location, logger: this.log }, this.options),
+        roundTrip(underscore.defaults({ location: self.location, logger: self.log }, self.options),
                   { path: '/current-sample' }, function (err, response, result) {
           if (err) {
-            this.log.error('roundTrip error: ' + err.toString())
+            self.log.error('roundTrip error: ' + err.toString())
             return callback(err)
           }
 
           if (result) {
-            this.cache.set('neurio', result)
-            this.accessoryInformation.setCharacteristic(Characteristic.SerialNumber, result.sensorId)
+            self.cache.set('neurio', result)
+            self.accessoryInformation.setCharacteristic(Characteristic.SerialNumber, result.sensorId)
           }
 
           callback(err, f(result, false))
-        }.bind(this))
-      }.bind(this))
+        })
+      })
     }
 
   , getVolts :
@@ -105,7 +111,7 @@ module.exports = function (homebridge) {
         if (!channel) return callback()
 
         callback(null, Math.round(channel.v_V))
-      }.bind(this))
+      })
     }
 
   , getVoltAmperes :
@@ -116,7 +122,7 @@ module.exports = function (homebridge) {
         if (!channel) return callback()
 
         callback(null, Math.round(channel.q_VAR))
-      }.bind(this))
+      })
     }
 
   , getWatts :
@@ -127,7 +133,7 @@ module.exports = function (homebridge) {
         if (!channel) return callback()
 
         callback(null, Math.round(channel.p_W))
-      }.bind(this))
+      })
     }
 
   , getKilowattHours :
@@ -138,7 +144,7 @@ module.exports = function (homebridge) {
         if (!channel) return callback()
 
         callback(null, Math.round((channel.eImp_Ws - channel.eExp_Ws) / (60 * 60 * 1000)))
-      }.bind(this))
+      })
     }
 
   , getServices: function () {

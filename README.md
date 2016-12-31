@@ -14,9 +14,8 @@ Edit `~/.homebridge/config`, inside `"accessories": [ ... ]` add:
     , "name"      : "Home Energy Monitor"
     , "location"  : "a.b.c.d"
 
-    // optional
-    , "cache"     : 10
-    , "options"   : { "verboseP": false }
+    // optional, here are the defaults
+    , "options"   : { "ttl": 5, "verboseP" : false }
     }
 
 How can you determine the IP address (`"a.b.c.d"`),
