@@ -1,5 +1,5 @@
 { "name"                         : "homebridge-accessory-neurio"
-, "version"                      : "0.2.5"
+, "version"                      : "0.2.7"
 , "description"                  : "A Neur.io accessory plugin for Homebridge: https://github.com/nfarina/homebridge"
 , "main"                         : "index.js"
 , "scripts"                      : { "lint" : "jshint package.json *.js" }
@@ -12,11 +12,11 @@
 , "bugs"                         : { "url": "https://github.com/homespun/homebridge-accessory-neurio/issues" }
 , "engines"                      :
   { "node"                       : ">=0.12.0"
-  , "homebridge"                 : ">=0.3.1"
+  , "homebridge"                 : ">=0.4.16"
   }
 , "dependencies"                 :
   { "hap-nodejs-community-types" : "https://github.com/homespun/hap-nodejs-community-types.git"
-  , "homespun-discovery"         : "0.1.19"
+  , "homespun-discovery"         : "0.1.21"
   , "node-cache"                 : "3.0.0"
   , "underscore"                 : "1.8.3"
   }
