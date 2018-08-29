@@ -9,7 +9,7 @@ Run these commands:
 
 On Linux, you might see this output for the second command:
 
-    npm ERR! pcap2@3.0.4 install: node-gyp rebuild
+    npm ERR! pcap@2.0.0 install: node-gyp rebuild
     npm ERR! Exit status 1
     npm ERR!
 
@@ -32,7 +32,7 @@ Then all subsequent installations must be like this:
     sudo npm install -g --unsafe-perm homebridge-accessory-neurio
 
 # Configuration
-Edit `~/.homebridge/config`, inside `"accessories": [ ... ]` add:
+Edit `~/.homebridge/config.json`, inside `"accessories": [ ... ]` add:
 
     { "accessory" : "neurio"
     , "name"      : "Home Energy Monitor"
