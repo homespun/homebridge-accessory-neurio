@@ -51,16 +51,16 @@ module.exports = function (homebridge) {
       , "ch"      : 3                         // channel number
       , "eImp_Ws" : 88033131184               // Imported energy in watt-seconds
       , "eExp_Ws" : 339972                    // Exported energy in watt-seconds
-      , "p_W"     : 14629                     // (Real) power in watts
+      , "p_W"     : 14629                     // Real power in watts
       , "q_VAR"   : 70                        // Reactive power in volt-amps reactive
       , "v_V"     : 122.858                   // Voltage in volts
       }
     ]
   , "cts":
-    [ { "ct"      : 1
-      , "p_W"     : 7282
-      , "q_VAR"   : 7
-      , "v_V"     : 122.839
+    [ { "ct"      : 1                         // CT enumeration
+      , "p_W"     : 7282                      // Real power in watts
+      , "q_VAR"   : 7                         // Reactive power in volt-amps reactive
+      , "v_V"     : 122.839                   // Voltage in volts
       }
     , ...
     ]
