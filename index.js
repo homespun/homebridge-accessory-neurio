@@ -1,15 +1,18 @@
-/* jshint asi: true, node: true, laxbreak: true, laxcomma: true, undef: true, unused: true */
+/* jshint asi: true, esversion: 6, node: true, laxbreak: true, laxcomma: true, undef: true, unused: true */
 
-var NodeCache  = require('node-cache')
-  , inherits   = require('util').inherits
-  , roundTrip  = require('homespun-discovery').utilities.roundtrip
-  , underscore = require('underscore')
+const NodeCache  = require('node-cache')
+    , debug         = require('debug')('neurio')
+    , inherits   = require('util').inherits
+    , moment     = require('moment')
+    , os         = require('os')
+    , roundTrip  = require('homespun-discovery').utilities.roundtrip
+    , underscore = require('underscore')
 
 
 module.exports = function (homebridge) {
-  var Characteristic = homebridge.hap.Characteristic
-    , Service = homebridge.hap.Service
-    , CommunityTypes = require('hap-nodejs-community-types')(homebridge)
+  const Characteristic = homebridge.hap.Characteristic
+      , Service = homebridge.hap.Service
+      , CommunityTypes = require('hap-nodejs-community-types')(homebridge)
 
   homebridge.registerAccessory("homebridge-accessory-neurio", "neurio", Neurio)
 
@@ -19,12 +22,14 @@ module.exports = function (homebridge) {
     this.log = log
     this.config = config || { platform: 'neurio' }
 
-    this.location = require('url').parse('http://' + this.config.location + '/')
     this.name = this.config.name
     this.options = underscore.defaults(this.config.options || {}, { ttl: 10, verboseP: false })
-    this.serialNo = this.config.serialNo || this.location.hostname
+    if (this.options < 10) this.options.ttl = 10
+    debug('options', this.options)
 
+    this.serialNo = this.config.serialNo || this.location.hostname
     this.cache = new NodeCache({ stdTTL: this.options.ttl })
+    this.location = require('url').parse('http://' + this.config.location + '/')
   }
 
   Neurio.PowerService = function (displayName, subtype) {
@@ -70,9 +75,9 @@ module.exports = function (homebridge) {
   Neurio.prototype =
   { fetchChannel :
     function (callback) {
-      var self = this
+      const self = this
       
-      var f = function (payload, cacheP) {
+      const f = function (payload, cacheP) {
         if ((!payload) || (!payload.channels)) {
           self.log.error('fetchChannel cacheP=' + cacheP + ': ' + JSON.stringify(payload, null, 2))
           return
@@ -94,6 +99,8 @@ module.exports = function (homebridge) {
           }
 
           if (result) {
+            self.historyService.addEntry({ time: moment().unix(), power: result.p_W })
+
             self.cache.set('neurio', result)
             self.accessoryInformation.setCharacteristic(Characteristic.SerialNumber, result.sensorId)
           }
@@ -148,7 +155,8 @@ module.exports = function (homebridge) {
     }
 
   , getServices: function () {
-      var myPowerService = new Neurio.PowerService("Power Functions")
+      const FakeGatoHistoryService = require('fakegato-history')(homebridge)
+          , myPowerService = new Neurio.PowerService("Power Functions")
 
       this.accessoryInformation = new Service.AccessoryInformation()
         .setCharacteristic(Characteristic.Name, this.name)
@@ -169,7 +177,18 @@ module.exports = function (homebridge) {
         .getCharacteristic(CommunityTypes.KilowattHours)
         .on('get', this.getKilowattHours.bind(this))
 
-      return [ this.accessoryInformation, myPowerService ]
+      this.displayName = this.name
+      this.historyService = new FakeGatoHistoryService('energy', this, {
+        storage: 'fs',
+        disableTimer: true,
+        path: homebridge.user.cachedAccessoryPath(),
+        filename: os.hostname().split(".")[0] + '_neurio_persist.json'
+      })
+
+      setTimeout(this.fetchChannel.bind(this), 1 * 1000)
+      setInterval(this.fetchChannel.bind(this), this.options.ttl * 1000)
+
+      return [ this.accessoryInformation, myPowerService, this.historyService ]
     }
   }
 }

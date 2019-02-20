@@ -1,7 +1,7 @@
 {
   "name": "homebridge-accessory-neurio",
-  "version": "0.3.0",
-  "description": "A Neur.io accessory plugin for Homebridge: https://github.com/nfarina/homebridge",
+  "version": "0.9.0",
+  "description": "A neur.io accessory plugin for Homebridge: https://github.com/nfarina/homebridge",
   "author": {
     "name": "Marshall Rose",
     "email": "mrose17@homespun.io"
@@ -29,6 +29,7 @@
     "homebridge": ">=0.4.16"
   },
   "dependencies": {
+    "fakegato-history": "^0.5.2",
     "hap-nodejs-community-types": "https://github.com/homespun/hap-nodejs-community-types.git",
     "homespun-discovery": "0.2.1",
     "node-cache": "4.2.0",
