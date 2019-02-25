@@ -39,7 +39,7 @@ Edit `~/.homebridge/config.json`, inside `"accessories": [ ... ]` add:
     , "location"  : "a.b.c.d"
 
     // optional, here are the defaults
-    , "options"   : { "ttl": 5, "verboseP" : false }
+    , "options"   : { "ttl": 600, "verboseP" : false }
     }
 
 How can you determine the IP address (`"a.b.c.d"`),

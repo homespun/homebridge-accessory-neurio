@@ -1,7 +1,6 @@
 /* jshint asi: true, esversion: 6, node: true, laxbreak: true, laxcomma: true, undef: true, unused: true */
 
-const NodeCache  = require('node-cache')
-    , debug         = require('debug')('neurio')
+const debug      = require('debug')('neurio')
     , inherits   = require('util').inherits
     , moment     = require('moment')
     , os         = require('os')
@@ -23,13 +22,12 @@ module.exports = function (homebridge) {
     this.config = config || { platform: 'neurio' }
 
     this.name = this.config.name
-    this.options = underscore.defaults(this.config.options || {}, { ttl: 10, verboseP: false })
-    if (this.options < 10) this.options.ttl = 10
+    this.options = underscore.defaults(this.config.options || {}, { ttl: 600, verboseP: false })
+    if (this.options < 10) this.options.ttl = 600
     debug('options', this.options)
 
-    this.serialNo = this.config.serialNo || this.location.hostname
-    this.cache = new NodeCache({ stdTTL: this.options.ttl })
     this.location = require('url').parse('http://' + this.config.location + '/')
+    this.serialNo = this.config.serialNo || this.location.hostname
   }
 
   Neurio.PowerService = function (displayName, subtype) {
@@ -77,36 +75,26 @@ module.exports = function (homebridge) {
     function (callback) {
       const self = this
       
-      const f = function (payload, cacheP) {
-        if ((!payload) || (!payload.channels)) {
-          self.log.error('fetchChannel cacheP=' + cacheP + ': ' + JSON.stringify(payload, null, 2))
-          return
+      if (!callback) callback = () => {}
+      roundTrip(underscore.defaults({ location: self.location, logger: self.log }, self.options),
+                { path: '/current-sample' }, function (err, response, result) {
+        if (err) {
+          self.log.error('roundTrip error: ' + err.toString())
+          return callback(err)
         }
 
-        return underscore.find(payload.channels, function (entry) { return entry.type === 'CONSUMPTION' })
-      }
+        if (result) self.accessoryInformation.setCharacteristic(Characteristic.SerialNumber, result.sensorId)
 
-      self.cache.get('neurio', function (err, result) {
-        if (err) return callback(err)
+        if ((!result) || (!result.channels)) {
+          self.log.error('fetchChannel: ' + JSON.stringify(result, null, 2))
+          return callback()
+        }
 
-        if (result) return callback(null, f(result, true))
+        const channel = underscore.find(result.channels, function (entry) { return entry.type === 'CONSUMPTION' })
 
-        roundTrip(underscore.defaults({ location: self.location, logger: self.log }, self.options),
-                  { path: '/current-sample' }, function (err, response, result) {
-          if (err) {
-            self.log.error('roundTrip error: ' + err.toString())
-            return callback(err)
-          }
+        self.historyService.addEntry({ time: moment().unix(), power: channel.p_W })
 
-          if (result) {
-            self.historyService.addEntry({ time: moment().unix(), power: result.p_W })
-
-            self.cache.set('neurio', result)
-            self.accessoryInformation.setCharacteristic(Characteristic.SerialNumber, result.sensorId)
-          }
-
-          callback(err, f(result, false))
-        })
+        callback(null, channel)
       })
     }
 
