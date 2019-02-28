@@ -71,10 +71,10 @@ module.exports = function (homebridge) {
  */
 
   Neurio.prototype =
-  { fetchChannel :
+  { fetchChannel:
     function (callback) {
       const self = this
-      
+
       if (!callback) callback = () => {}
       roundTrip(underscore.defaults({ location: self.location, logger: self.log }, self.options),
                 { path: '/current-sample' }, function (err, response, result) {
@@ -83,8 +83,9 @@ module.exports = function (homebridge) {
           return callback(err)
         }
 
-        if (result) self.accessoryInformation.setCharacteristic(Characteristic.SerialNumber, result.sensorId)
-
+        if ((result) && (result.sensorId)) {
+          self.accessoryInformation.setCharacteristic(Characteristic.SerialNumber, result.sensorId)
+        }
         if ((!result) || (!result.channels)) {
           self.log.error('fetchChannel: ' + JSON.stringify(result, null, 2))
           return callback()
@@ -92,51 +93,56 @@ module.exports = function (homebridge) {
 
         const channel = underscore.find(result.channels, function (entry) { return entry.type === 'CONSUMPTION' })
 
-        self.historyService.addEntry({ time: moment().unix(), power: channel.p_W })
-
+        self.fetchField(err, channel, 'p_W', function (err, value) {
+          self.historyService.addEntry({ time: moment().unix(), power: value })
+        })
         callback(null, channel)
       })
     }
 
-  , getVolts :
+  , fetchField:
+    function (err, channel, field, callback) {
+      if (err) return callback(err)
+
+      if ((!channel) || (isNaN(channel[field]))) return callback()
+
+      debug('rfetchField', { field, value: channel[field] })
+      callback(null, Math.round(channel[field]))
+  }
+
+  , getVolts:
     function (callback) {
-      this.fetchChannel(function (err, channel) {
-        if (err) return callback(err)
+      const self = this
 
-        if (!channel) return callback()
-
-        callback(null, Math.round(channel.v_V))
+      self.fetchChannel(function (err, channel) {
+        self.fetchField(err, channel, 'v_V', callback)
       })
     }
 
-  , getVoltAmperes :
+  , getVoltAmperes:
     function (callback) {
-      this.fetchChannel(function (err, channel) {
-        if (err) return callback(err)
+      const self = this
 
-        if (!channel) return callback()
-
-        callback(null, Math.round(channel.q_VAR))
+      self.fetchChannel(function (err, channel) {
+        self.fetchField(err, channel, 'q_VAR', callback)
       })
     }
 
-  , getWatts :
+  , getWatts:
     function (callback) {
-      this.fetchChannel(function (err, channel) {
-        if (err) return callback(err)
+      const self = this
 
-        if (!channel) return callback()
-
-        callback(null, Math.round(channel.p_W))
+      self.fetchChannel(function (err, channel) {
+        self.fetchField(err, channel, 'p_W', callback)
       })
     }
 
-  , getKilowattHours :
+  , getKilowattHours:
     function (callback) {
       this.fetchChannel(function (err, channel) {
         if (err) return callback(err)
 
-        if (!channel) return callback()
+        if ((!channel) || (isNaN(channel.eImp_Ws)) || (isNaN(channel.eExp_Ws))) return callback()
 
         callback(null, Math.round((channel.eImp_Ws - channel.eExp_Ws) / (60 * 60 * 1000)))
       })
