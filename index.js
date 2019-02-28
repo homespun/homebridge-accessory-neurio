@@ -23,7 +23,7 @@ module.exports = function (homebridge) {
 
     this.name = this.config.name
     this.options = underscore.defaults(this.config.options || {}, { ttl: 600, verboseP: false })
-    if (this.options < 10) this.options.ttl = 600
+    if (this.options.ttl < 10) this.options.ttl = 600
     debug('options', this.options)
 
     this.location = require('url').parse('http://' + this.config.location + '/')
@@ -106,7 +106,7 @@ module.exports = function (homebridge) {
 
       if ((!channel) || (isNaN(channel[field]))) return callback()
 
-      debug('rfetchField', { field, value: channel[field] })
+      debug('fetchField', { field, value: channel[field] })
       callback(null, Math.round(channel[field]))
   }
 
