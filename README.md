@@ -42,6 +42,6 @@ Edit `~/.homebridge/config.json`, inside `"accessories": [ ... ]` add:
     , "options"   : { "ttl": 600, "verboseP" : false }
     }
 
-How can you determine the IP address (`"a.b.c.d"`),
-run [homespun-discovery](https://github.com/homespun/homespun-discovery),
+How can you determine the IP address (`"a.b.c.d"`)?
+Run [homespun-discovery](https://github.com/homespun/homespun-discovery),
 of course.
