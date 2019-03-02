@@ -3,7 +3,6 @@
 const debug      = require('debug')('neurio')
     , inherits   = require('util').inherits
     , moment     = require('moment')
-    , os         = require('os')
     , roundTrip  = require('homespun-discovery').utilities.roundtrip
     , underscore = require('underscore')
 
@@ -19,7 +18,7 @@ module.exports = function (homebridge) {
     if (!(this instanceof Neurio)) return new Neurio(log, config)
 
     this.log = log
-    this.config = config || { platform: 'neurio' }
+    this.config = config || { accessory: 'neurio' }
 
     this.name = this.config.name
     this.options = underscore.defaults(this.config.options || {}, { ttl: 600, verboseP: false })
@@ -94,7 +93,7 @@ module.exports = function (homebridge) {
         const channel = underscore.find(result.channels, function (entry) { return entry.type === 'CONSUMPTION' })
 
         self.fetchField(err, channel, 'p_W', function (err, value) {
-          self.historyService.addEntry({ time: moment().unix(), power: value })
+          if ((!err) && (value !== undefined)) self.historyService.addEntry({ time: moment().unix(), power: value })
         })
         callback(null, channel)
       })
@@ -150,7 +149,7 @@ module.exports = function (homebridge) {
 
   , getServices: function () {
       const FakeGatoHistoryService = require('fakegato-history')(homebridge)
-          , myPowerService = new Neurio.PowerService("Power Functions")
+          , myPowerService = new Neurio.PowerService(this.name)
 
       this.accessoryInformation = new Service.AccessoryInformation()
         .setCharacteristic(Characteristic.Name, this.name)
@@ -176,7 +175,7 @@ module.exports = function (homebridge) {
         storage: 'fs',
         disableTimer: true,
         path: homebridge.user.cachedAccessoryPath(),
-        filename: os.hostname().split(".")[0] + '_neurio_persist.json'
+        filename: this.location.host + '-neurio_persist.json'
       })
 
       setTimeout(this.fetchChannel.bind(this), 1 * 1000)
