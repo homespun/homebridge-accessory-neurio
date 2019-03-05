@@ -172,10 +172,11 @@ module.exports = function (homebridge) {
 
       this.displayName = this.name
       this.historyService = new FakeGatoHistoryService('energy', this, {
-        storage: 'fs',
-        disableTimer: true,
-        path: homebridge.user.cachedAccessoryPath(),
-        filename: this.location.host + '-neurio_persist.json'
+        storage      : 'fs',
+        disableTimer : true,
+        length       : Math.pow(2, 14),
+        path         : homebridge.user.cachedAccessoryPath(),
+        filename     : this.location.host + '-neurio_persist.json'
       })
 
       setTimeout(this.fetchChannel.bind(this), 1 * 1000)
