@@ -29,15 +29,6 @@ module.exports = function (homebridge) {
     this.serialNo = this.config.serialNo || this.location.hostname
   }
 
-  Neurio.PowerService = function (displayName, subtype) {
-    Service.call(this, displayName, '00000001-0000-1000-8000-135D67EC4377', subtype)
-    this.addCharacteristic(CommunityTypes.Volts)
-    this.addCharacteristic(CommunityTypes.VoltAmperes)
-    this.addCharacteristic(CommunityTypes.Watts)
-    this.addCharacteristic(CommunityTypes.KilowattHours)
-  }
-  inherits(Neurio.PowerService, Service)
-
 /* GET http://a.b.c.d/current-sample returns
 
   { "sensorId"    : "0x0000............"
@@ -95,6 +86,7 @@ module.exports = function (homebridge) {
         self.fetchField(err, channel, 'p_W', function (err, value) {
           if ((!err) && (value !== undefined)) self.historyService.addEntry({ time: moment().unix(), power: value })
         })
+//      debug('fetchChannel', channel)
         callback(null, channel)
       })
     }
@@ -106,7 +98,7 @@ module.exports = function (homebridge) {
       if ((!channel) || (isNaN(channel[field]))) return callback()
 
       debug('fetchField', { field, value: channel[field] })
-      callback(null, Math.round(channel[field]))
+      callback(null, Math.round(Math.abs(channel[field])))
   }
 
   , getVolts:
@@ -148,8 +140,17 @@ module.exports = function (homebridge) {
     }
 
   , getServices: function () {
+      const PowerService = function (displayName, subtype) {
+        Service.call(this, displayName, '00000001-0000-1000-8000-135D67EC4377', subtype)
+        this.addCharacteristic(CommunityTypes.Volts)
+        this.addCharacteristic(CommunityTypes.VoltAmperes)
+        this.addCharacteristic(CommunityTypes.Watts)
+        this.addCharacteristic(CommunityTypes.KilowattHours)
+      }
+      inherits(PowerService, Service)
+
       const FakeGatoHistoryService = require('fakegato-history')(homebridge)
-          , myPowerService = new Neurio.PowerService(this.name)
+          , myPowerService = new PowerService()
 
       this.accessoryInformation = new Service.AccessoryInformation()
         .setCharacteristic(Characteristic.Name, this.name)
