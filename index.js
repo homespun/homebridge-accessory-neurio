@@ -150,7 +150,7 @@ module.exports = function (homebridge) {
       inherits(PowerService, Service)
 
       const FakeGatoHistoryService = require('fakegato-history')(homebridge)
-          , myPowerService = new PowerService()
+          , myPowerService = new PowerService(this.name)
 
       this.accessoryInformation = new Service.AccessoryInformation()
         .setCharacteristic(Characteristic.Name, this.name)
