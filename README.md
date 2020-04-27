@@ -40,6 +40,10 @@ Edit `~/.homebridge/config.json`, inside `"accessories": [ ... ]` add:
 
     // optional, here are the defaults
     , "options"   : { "ttl": 600, "verboseP" : false }
+
+    // also optional, supply either both or neither
+    , "username"  : "Aladdin"
+    , "password"  : "OpenSesame"
     }
 
 How can you determine the IP address (`"a.b.c.d"`)?

@@ -1,6 +1,6 @@
 {
   "name": "homebridge-accessory-neurio",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "description": "A neur.io accessory plugin for Homebridge: https://github.com/nfarina/homebridge",
   "author": {
     "name": "Marshall Rose",
@@ -8,6 +8,7 @@
   },
   "main": "index.js",
   "scripts": {
+    "developer": "DEBUG=neurio homebridge -D -U `pwd` -P `pwd`",
     "lint": "jshint package.json *.js"
   },
   "license": "MIT",

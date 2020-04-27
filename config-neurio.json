@@ -8,7 +8,7 @@
 , "accessories":
   [ { "accessory": "neurio"
     , "name": "Home Energy Monitor"
-    , "location": "192.168.1.114"
+    , "location": "192.168.1.145"
     }
   ]
 , "platforms":

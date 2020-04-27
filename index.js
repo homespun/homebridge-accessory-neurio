@@ -23,6 +23,10 @@ module.exports = function (homebridge) {
     this.name = this.config.name
     this.options = underscore.defaults(this.config.options || {}, { ttl: 600, verboseP: false })
     if (this.options.ttl < 10) this.options.ttl = 600
+    if (this.config.username && this.config.password) {
+      this.headers = { Authorization: 'Basic ' + Buffer.from(this.config.username + ':'
+                                                             + this.config.password).toString('base64') }
+    }
     debug('options', this.options)
 
     this.location = require('url').parse('http://' + this.config.location + '/')
@@ -67,7 +71,7 @@ module.exports = function (homebridge) {
 
       if (!callback) callback = () => {}
       roundTrip(underscore.defaults({ location: self.location, logger: self.log }, self.options),
-                { path: '/current-sample' }, function (err, response, result) {
+                { path: '/current-sample', headers: self.headers }, function (err, response, result) {
         if (err) {
           self.log.error('roundTrip error: ' + err.toString())
           return callback(err)
