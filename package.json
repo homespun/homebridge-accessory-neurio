@@ -1,6 +1,6 @@
 {
   "name": "homebridge-accessory-neurio",
-  "version": "0.9.10",
+  "version": "0.9.11",
   "description": "A neur.io accessory plugin for Homebridge: https://github.com/nfarina/homebridge",
   "author": {
     "name": "Marshall Rose",
@@ -35,6 +35,7 @@
     "homespun-discovery": "0.2.1",
     "lodash": "4.17.19",
     "node-cache": "4.2.0",
+    "node-fetch": "2.6.1",
     "underscore": "1.8.3"
   }
 }
